@@ -1,0 +1,2 @@
+.banner { margin-bottom: 16px; }
+.banner__inner { background: linear-gradient(90deg,#e8f0ff,#f7fbff); border: 1px solid var(--border); padding: 12px 16px; border-radius: 10px; }

@@ -1,0 +1,5 @@
+.search-bar { background: transparent; padding: 12px 0; }
+.search-bar__form { display: flex; gap: 8px; }
+.search-bar__input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+.search-bar__clear { padding: 10px 12px; border: 1px solid var(--border); background: #fff; border-radius: 8px; cursor: pointer; }
+.search-bar__clear:hover { background: #f3f3f3; }
