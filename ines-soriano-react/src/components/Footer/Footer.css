@@ -1,2 +1,18 @@
-.footer { border-top: 1px solid var(--border); background: #565656; margin-top: 10px; }
-.footer__inner { height: 56px; display: flex; align-items: center; }
+.footer {
+  border-top: 1px solid var(--border);
+  margin-top: 10px;
+}
+
+.footer--light {
+  background: #f7f7f7;
+}
+
+.footer--dark {
+  background: #565656;
+}
+
+.footer__inner {
+  height: 56px;
+  display: flex;
+  align-items: center;
+}

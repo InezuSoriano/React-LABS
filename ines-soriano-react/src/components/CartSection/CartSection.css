@@ -1,0 +1,37 @@
+.cart {
+  padding: 16px 0;
+}
+
+.cart__title {
+  margin: 0 0 8px;
+}
+
+.cart__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.cart__item {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+.cart__name {
+  font-weight: 500;
+}
+
+.cart__qty,
+.cart__price,
+.cart__subtotal {
+  text-align: right;
+}
+
+.cart__total {
+  text-align: right;
+  font-size: 1rem;
+}

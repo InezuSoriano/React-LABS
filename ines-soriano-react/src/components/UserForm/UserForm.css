@@ -1,0 +1,39 @@
+.user-form {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.user-form__title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.user-form__form {
+  display: grid;
+  gap: 8px;
+  max-width: 320px;
+}
+
+.user-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+}
+
+.user-form__field input {
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.user-form__error {
+  margin: 4px 0;
+  color: #b20000;
+  font-size: 0.9rem;
+}
+
+.user-form__welcome {
+  margin: 4px 0 8px;
+}

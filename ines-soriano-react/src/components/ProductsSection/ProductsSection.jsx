@@ -7,7 +7,7 @@ function normalize(text) {
     .replace(/\p{Diacritic}/gu, "");
 }
 
-function ProductSection({ products, filterText }) {
+function ProductSection({ products, filterText, onAddToCart, onBuyNow }) {
   const normFilter = normalize(filterText);
 
   const filtered = products.filter((p) =>
@@ -27,12 +27,16 @@ function ProductSection({ products, filterText }) {
           margin: 0,
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: "1rem"
+          gap: "1rem",
         }}
       >
         {filtered.map((p) => (
           <li key={p.id}>
-            <ProductCard product={p} />
+            <ProductCard
+              product={p}
+              onAddToCart={onAddToCart}
+              onBuyNow={onBuyNow}
+            />
           </li>
         ))}
       </ul>
