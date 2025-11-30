@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
-import data from "./fakeapi/data.json";
+import { Outlet, useNavigate } from "react-router-dom";
 import Header from "./components/Header/Header.jsx";
-import Banner from "./components/Banner/Banner.jsx";
-import ProductsSection from "./components/ProductsSection/ProductsSection.jsx";
 import Footer from "./components/Footer/Footer.jsx";
-import CartSection from "./components/CartSection/CartSection.jsx";
-import UserForm from "./components/UserForm/UserForm.jsx";
 
 function useUser() {
   const [user, setUser] = useState(() => {
@@ -24,8 +20,7 @@ function useUser() {
       } else {
         window.localStorage.removeItem("user");
       }
-    } catch {
-    }
+    } catch {}
   }, [user]);
 
   return [user, setUser];
@@ -33,10 +28,25 @@ function useUser() {
 
 function App() {
   const [filterText, setFilterText] = useState("");
-  const [cartItems, setCartItems] = useState([]);
-  const [view, setView] = useState("products");
+
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const stored = window.localStorage.getItem("cart");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("cart", JSON.stringify(cartItems));
+    } catch {}
+  }, [cartItems]);
+
   const [theme, setTheme] = useState("light");
   const [user, setUser] = useUser();
+  const navigate = useNavigate();
 
   const cartCount = cartItems.reduce(
     (total, item) => total + item.quantity,
@@ -67,7 +77,17 @@ function App() {
 
   function handleBuyNow(product) {
     handleAddToCart(product);
-    setView("cart");
+    navigate("/cart");
+  }
+
+  function handleClearCart() {
+    setCartItems([]);
+  }
+
+  function handleCompletePurchase() {
+    if (cartItems.length === 0) return;
+    alert("Compra realizada con éxito");
+    setCartItems([]);
   }
 
   function handleToggleTheme() {
@@ -88,31 +108,24 @@ function App() {
         value={filterText}
         onChange={setFilterText}
         cartCount={cartCount}
-        onCartClick={() => setView("cart")}
-        onLogoClick={() => setView("products")}
         theme={theme}
         onToggleTheme={handleToggleTheme}
       />
-      <div className="container">
-        <Banner user={user} />
 
-        {view === "products" ? (
-          <ProductsSection
-            products={data}
-            filterText={filterText}
-            onAddToCart={handleAddToCart}
-            onBuyNow={handleBuyNow}
-          />
-        ) : (
-          <CartSection items={cartItems} />
-        )}
+      <Outlet
+        context={{
+          user,
+          onLogin: handleLogin,
+          onLogout: handleLogout,
+          cartItems,
+          filterText,
+          onAddToCart: handleAddToCart,
+          onBuyNow: handleBuyNow,
+          onClearCart: handleClearCart,
+          onCompletePurchase: handleCompletePurchase,
+        }}
+      />
 
-        <UserForm
-          user={user}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-        />
-      </div>
       <Footer theme={theme} />
     </>
   );
