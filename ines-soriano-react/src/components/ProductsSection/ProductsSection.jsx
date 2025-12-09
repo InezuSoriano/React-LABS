@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard.jsx";
 import AddProductModal from "../modals/AddProductModal.jsx";
 import EditProductModal from "../modals/EditProductModal.jsx";
-import { useProducts } from "../../context/ProductsContext.jsx";
+import {
+  addProductThunk,
+  updateProductThunk,
+  deleteProductThunk,
+} from "../../store/productsThunks.js";
 
 function normalize(text) {
   return text
@@ -12,7 +17,7 @@ function normalize(text) {
     .replace(/\p{Diacritic}/gu, "");
 }
 
-function ProductSection({
+function ProductsSection({
   products,
   filterText,
   onAddToCart,
@@ -21,13 +26,13 @@ function ProductSection({
   isAdmin,
 }) {
   const navigate = useNavigate();
-  const { addProduct, updateProduct, deleteProduct } = useProducts();
+  const dispatch = useDispatch();
 
   const [modalAddOpen, setModalAddOpen] = useState(false);
   const [modalEditOpen, setModalEditOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const normFilter = normalize(filterText);
+  const normFilter = normalize(filterText || "");
 
   const filtered = products.filter((p) =>
     normalize(p.title).includes(normFilter)
@@ -47,7 +52,15 @@ function ProductSection({
   }
 
   function handleDelete(id) {
-    deleteProduct(id);
+    dispatch(deleteProductThunk(id));
+  }
+
+  function handleAddProduct(newProduct) {
+    dispatch(addProductThunk(newProduct));
+  }
+
+  function handleUpdateProduct(id, updatedProduct) {
+    dispatch(updateProductThunk({ id, updatedProduct }));
   }
 
   return (
@@ -97,7 +110,7 @@ function ProductSection({
       {modalAddOpen && (
         <AddProductModal
           onClose={() => setModalAddOpen(false)}
-          onSubmit={addProduct}
+          onSubmit={handleAddProduct}
         />
       )}
 
@@ -105,11 +118,11 @@ function ProductSection({
         <EditProductModal
           product={editingProduct}
           onClose={() => setModalEditOpen(false)}
-          onSubmit={updateProduct}
+          onSubmit={handleUpdateProduct}
         />
       )}
     </section>
   );
 }
 
-export default ProductSection;
+export default ProductsSection;

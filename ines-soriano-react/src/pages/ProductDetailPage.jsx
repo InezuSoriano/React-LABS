@@ -1,14 +1,53 @@
-import { useNavigate, useLoaderData, useOutletContext } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+  getProductByIdThunk,
+} from "../store/productsThunks.js";
+import {
+  selectSelectedProduct,
+  selectProductsLoading,
+  selectProductsError,
+  clearSelectedProduct,
+} from "../store/productsSlice.js";
 
 function ProductDetailPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user, onAddToCart } = useOutletContext();
-  const product = useLoaderData();
 
-  if (!product) {
+  const dispatch = useDispatch();
+  const product = useSelector(selectSelectedProduct);
+  const isLoading = useSelector(selectProductsLoading);
+  const error = useSelector(selectProductsError);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(getProductByIdThunk(id));
+    }
+
+    return () => {
+      dispatch(clearSelectedProduct());
+    };
+  }, [dispatch, id]);
+
+  if (isLoading && !product) {
     return (
       <div className="container">
-        <p>Producto no encontrado.</p>
+        <p>Cargando producto...</p>
+      </div>
+    );
+  }
+
+  if (error && !product) {
+    return (
+      <div className="container">
+        <p>{error}</p>
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -20,6 +59,10 @@ function ProductDetailPage() {
     );
   }
 
+  if (!product) {
+    return null;
+  }
+
   const { title, description, price, image, category, rating } = product;
 
   const handleAddToCart = () => {
@@ -29,6 +72,8 @@ function ProductDetailPage() {
   const handleBack = () => {
     navigate(-1);
   };
+
+  const isAuthenticated = Boolean(user);
 
   return (
     <div className="container">
@@ -93,7 +138,7 @@ function ProductDetailPage() {
             </p>
           )}
 
-          {user ? (
+          {isAuthenticated ? (
             <button
               type="button"
               onClick={handleAddToCart}
