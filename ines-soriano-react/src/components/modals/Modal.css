@@ -19,12 +19,49 @@
   gap: 1rem;
 }
 
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.modal__field > span {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .modal input,
 .modal textarea {
   width: 100%;
   padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font: inherit;
+}
+
+.modal textarea {
+  resize: vertical;
+}
+
+.modal__error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #b3261e;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .modal-close {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }

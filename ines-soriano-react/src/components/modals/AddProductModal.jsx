@@ -10,17 +10,63 @@ function AddProductModal({ onClose, onSubmit }) {
     image: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  }
+
+  function validate() {
+    const newErrors = {};
+
+    if (!form.title.trim()) {
+      newErrors.title = "El título es obligatorio.";
+    }
+
+    if (!form.description.trim()) {
+      newErrors.description = "La descripción es obligatoria.";
+    }
+
+    if (!form.category.trim()) {
+      newErrors.category = "La categoría es obligatoria.";
+    }
+
+    const priceNumber = Number(form.price);
+    if (!form.price) {
+      newErrors.price = "El precio es obligatorio.";
+    } else if (Number.isNaN(priceNumber) || priceNumber <= 0) {
+      newErrors.price = "El precio debe ser un número mayor que 0.";
+    }
+
+    if (form.image.trim()) {
+      // validación muy ligera de URL
+      const looksLikeUrl = /^https?:\/\/.+/i.test(form.image.trim());
+      if (!looksLikeUrl) {
+        newErrors.image = "Introduce una URL de imagen válida (http o https).";
+      }
+    }
+
+    return newErrors;
   }
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     onSubmit({
       ...form,
       price: Number(form.price),
       rating: { rate: 0, count: 0 },
     });
+
     onClose();
   }
 
@@ -35,51 +81,82 @@ function AddProductModal({ onClose, onSubmit }) {
       <div className="modal">
         <h2>Añadir nuevo producto</h2>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            name="title"
-            placeholder="Título"
-            value={form.title}
-            onChange={handleChange}
-            required
-          />
+        <form onSubmit={handleSubmit} className="modal__form">
+          <label className="modal__field">
+            <span>Título</span>
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              autoComplete="off"
+            />
+            {errors.title && (
+              <p className="modal__error">{errors.title}</p>
+            )}
+          </label>
 
-          <input
-            name="price"
-            placeholder="Precio"
-            type="number"
-            value={form.price}
-            onChange={handleChange}
-            required
-          />
+          <label className="modal__field">
+            <span>Precio</span>
+            <input
+              name="price"
+              type="number"
+              step="0.01"
+              value={form.price}
+              onChange={handleChange}
+            />
+            {errors.price && (
+              <p className="modal__error">{errors.price}</p>
+            )}
+          </label>
 
-          <input
-            name="category"
-            placeholder="Categoría"
-            value={form.category}
-            onChange={handleChange}
-            required
-          />
+          <label className="modal__field">
+            <span>Categoría</span>
+            <input
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              autoComplete="off"
+            />
+            {errors.category && (
+              <p className="modal__error">{errors.category}</p>
+            )}
+          </label>
 
-          <input
-            name="image"
-            placeholder="URL imagen"
-            value={form.image}
-            onChange={handleChange}
-          />
+          <label className="modal__field">
+            <span>URL de imagen (opcional)</span>
+            <input
+              name="image"
+              value={form.image}
+              onChange={handleChange}
+              autoComplete="off"
+            />
+            {errors.image && (
+              <p className="modal__error">{errors.image}</p>
+            )}
+          </label>
 
-          <textarea
-            name="description"
-            placeholder="Descripción"
-            value={form.description}
-            onChange={handleChange}
-            required
-          />
+          <label className="modal__field">
+            <span>Descripción</span>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows={3}
+            />
+            {errors.description && (
+              <p className="modal__error">{errors.description}</p>
+            )}
+          </label>
 
-          <button type="submit">Crear</button>
+          <div className="modal__actions">
+            <button type="button" onClick={onClose}>
+              Cancelar
+            </button>
+            <button type="submit">
+              Crear
+            </button>
+          </div>
         </form>
-
-        <button className="modal-close" onClick={onClose}>Cerrar</button>
       </div>
     </div>
   );
