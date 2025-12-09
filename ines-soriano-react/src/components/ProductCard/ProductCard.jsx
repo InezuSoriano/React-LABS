@@ -4,13 +4,14 @@ function ProductCard({
   onBuyNow,
   onOpenDetail,
   isAuthenticated,
+  isAdmin,
+  onEdit,
+  onDelete,
 }) {
   const { title, description, price, image, category, rating } = product;
 
   const handleCardClick = () => {
-    if (onOpenDetail) {
-      onOpenDetail();
-    }
+    if (onOpenDetail) onOpenDetail();
   };
 
   const handleAddToCart = (event) => {
@@ -23,6 +24,16 @@ function ProductCard({
     onBuyNow(product);
   };
 
+  const handleEdit = (event) => {
+    event.stopPropagation();
+    if (onEdit) onEdit(product);
+  };
+
+  const handleDelete = (event) => {
+    event.stopPropagation();
+    if (onDelete) onDelete(product.id);
+  };
+
   return (
     <article
       onClick={handleCardClick}
@@ -33,7 +44,7 @@ function ProductCard({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        cursor: onOpenDetail ? "pointer" : "default",
+        cursor: "pointer",
       }}
     >
       <img
@@ -41,61 +52,43 @@ function ProductCard({
         alt={title}
         loading="lazy"
         style={{
-          display: "block",
           width: "100%",
           height: 160,
           objectFit: "cover",
         }}
       />
+
       <div
         style={{
           padding: "0.75rem",
           display: "flex",
           flexDirection: "column",
           gap: "0.35rem",
-          flex: 1,
         }}
       >
         <h3 style={{ margin: 0 }}>{title}</h3>
-        <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.8 }}>
-          {category}
-        </p>
-        <p style={{ margin: 0, opacity: 0.85 }}>{description}</p>
-        <p style={{ margin: 0, fontWeight: 700 }}>
-          {price.toFixed(2)} €
-        </p>
+        <p>{category}</p>
+        <p>{description}</p>
+        <p style={{ fontWeight: 700 }}>{price} €</p>
+
         {rating && (
-          <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.85 }}>
-            Valoración: {rating.rate} · {rating.count} reseñas
-          </p>
+          <p>Valoración: {rating.rate} · {rating.count} reseñas</p>
         )}
 
-        {isAuthenticated ? (
-          <div
-            style={{
-              marginTop: "0.5rem",
-              display: "flex",
-              gap: "0.5rem",
-              justifyContent: "space-between",
-            }}
-          >
-            <button type="button" onClick={handleAddToCart}>
-              Añadir a la cesta
-            </button>
-            <button type="button" onClick={handleBuyNow}>
-              Comprar
-            </button>
+        {isAuthenticated && (
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button onClick={handleAddToCart}>Añadir a la cesta</button>
+            <button onClick={handleBuyNow}>Comprar</button>
           </div>
-        ) : (
-          <p
-            style={{
-              marginTop: "0.5rem",
-              fontSize: "0.85rem",
-              opacity: 0.8,
-            }}
-          >
-            Inicia sesión para comprar.
-          </p>
+        )}
+
+        {!isAuthenticated && <p>Inicia sesión para comprar.</p>}
+
+        {isAdmin && (
+          <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem" }}>
+            <button onClick={handleEdit}>Editar</button>
+            <button onClick={handleDelete}>Eliminar</button>
+          </div>
         )}
       </div>
     </article>

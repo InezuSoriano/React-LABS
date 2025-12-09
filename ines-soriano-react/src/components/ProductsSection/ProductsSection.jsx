@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../ProductCard/ProductCard.jsx";
+import AddProductModal from "../modals/AddProductModal.jsx";
+import EditProductModal from "../modals/EditProductModal.jsx";
+import { useProducts } from "../../context/ProductsContext.jsx";
 
 function normalize(text) {
   return text
@@ -14,8 +18,14 @@ function ProductSection({
   onAddToCart,
   onBuyNow,
   isAuthenticated,
+  isAdmin,
 }) {
   const navigate = useNavigate();
+  const { addProduct, updateProduct, deleteProduct } = useProducts();
+
+  const [modalAddOpen, setModalAddOpen] = useState(false);
+  const [modalEditOpen, setModalEditOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const normFilter = normalize(filterText);
 
@@ -30,6 +40,15 @@ function ProductSection({
   const handleOpenDetail = (id) => {
     navigate(`/product/${id}`);
   };
+
+  function handleEdit(product) {
+    setEditingProduct(product);
+    setModalEditOpen(true);
+  }
+
+  function handleDelete(id) {
+    deleteProduct(id);
+  }
 
   return (
     <section aria-label="Listado de productos">
@@ -52,11 +71,43 @@ function ProductSection({
                 onBuyNow={onBuyNow}
                 onOpenDetail={() => handleOpenDetail(p.id)}
                 isAuthenticated={isAuthenticated}
+                isAdmin={isAdmin}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             </li>
           ))}
         </ul>
+
+        {isAdmin && (
+          <button
+            style={{
+              marginTop: "2rem",
+              background: "red",
+              color: "white",
+              padding: "1rem",
+            }}
+            onClick={() => setModalAddOpen(true)}
+          >
+            Añadir nuevo producto
+          </button>
+        )}
       </div>
+
+      {modalAddOpen && (
+        <AddProductModal
+          onClose={() => setModalAddOpen(false)}
+          onSubmit={addProduct}
+        />
+      )}
+
+      {modalEditOpen && editingProduct && (
+        <EditProductModal
+          product={editingProduct}
+          onClose={() => setModalEditOpen(false)}
+          onSubmit={updateProduct}
+        />
+      )}
     </section>
   );
 }

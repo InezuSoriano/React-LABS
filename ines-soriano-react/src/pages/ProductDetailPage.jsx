@@ -1,18 +1,19 @@
-import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import data from "../fakeapi/data.json";
+import { useNavigate, useLoaderData, useOutletContext } from "react-router-dom";
 
 function ProductDetailPage() {
-  const { id } = useParams();
   const navigate = useNavigate();
   const { user, onAddToCart } = useOutletContext();
-
-  const product = data.find((item) => String(item.id) === String(id));
+  const product = useLoaderData();
 
   if (!product) {
     return (
       <div className="container">
         <p>Producto no encontrado.</p>
-        <button type="button" onClick={() => navigate("/")}>
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          style={{ marginTop: "1rem" }}
+        >
           Volver a la tienda
         </button>
       </div>
@@ -31,7 +32,11 @@ function ProductDetailPage() {
 
   return (
     <div className="container">
-      <button type="button" onClick={handleBack} style={{ margin: "1rem 0" }}>
+      <button
+        type="button"
+        onClick={handleBack}
+        style={{ margin: "1rem 0" }}
+      >
         ← Volver
       </button>
 
@@ -40,7 +45,6 @@ function ProductDetailPage() {
           display: "grid",
           gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 1fr)",
           gap: "2rem",
-          alignItems: "flex-start",
         }}
       >
         <div>
@@ -59,16 +63,30 @@ function ProductDetailPage() {
         </div>
 
         <div
-          style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.75rem",
+          }}
         >
           <h1 style={{ margin: 0 }}>{title}</h1>
+
           <p style={{ margin: 0, fontSize: "0.95rem", opacity: 0.8 }}>
             {category}
           </p>
+
           <p style={{ margin: 0 }}>{description}</p>
-          <p style={{ margin: 0, fontWeight: 700, fontSize: "1.2rem" }}>
-            {price.toFixed(2)} €
+
+          <p
+            style={{
+              margin: 0,
+              fontWeight: 700,
+              fontSize: "1.2rem",
+            }}
+          >
+            {price} €
           </p>
+
           {rating && (
             <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.85 }}>
               Valoración: {rating.rate} · {rating.count} reseñas

@@ -28,7 +28,6 @@ function useUser() {
 
 function App() {
   const [filterText, setFilterText] = useState("");
-
   const [cartItems, setCartItems] = useState(() => {
     try {
       const stored = window.localStorage.getItem("cart");
@@ -94,8 +93,17 @@ function App() {
     setTheme((current) => (current === "light" ? "dark" : "light"));
   }
 
-  function handleLogin(newUser) {
-    setUser(newUser);
+  function handleLogin(formUser) {
+    const role = formUser.email.includes("admin")
+      ? "admin"
+      : "user";
+
+    const fullUser = {
+      ...formUser,
+      role,
+    };
+
+    setUser(fullUser);
   }
 
   function handleLogout() {
@@ -115,6 +123,8 @@ function App() {
       <Outlet
         context={{
           user,
+          isAuthenticated: Boolean(user),
+          isAdmin: user?.role === "admin",
           onLogin: handleLogin,
           onLogout: handleLogout,
           cartItems,
