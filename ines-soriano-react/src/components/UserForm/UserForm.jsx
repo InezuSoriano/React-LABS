@@ -1,84 +1,141 @@
-import { useEffect, useState } from "react";
-import "./UserForm.css";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
 
 function UserForm({ user, onLogin, onLogout }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    mode: "onBlur",
+    reValidateMode: "onBlur",
+    defaultValues: {
+      email: "",
+      password: "",
+      repeatPassword: "",
+    },
+  });
+
+  const password = watch("password");
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
-      setEmail(user.email);
-      setError("");
-    } else {
-      setName("");
-      setEmail("");
+      reset({
+        email: "",
+        password: "",
+        repeatPassword: "",
+      });
     }
-  }, [user]);
+  }, [user, reset]);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
-
-    if (!trimmedName) {
-      setError("El nombre es obligatorio.");
+  const onSubmit = (values) => {
+    if (typeof onLogin !== "function") {
+      console.error(
+        "UserForm: onLogin no es una función. Revisa LoginPage.jsx."
+      );
       return;
     }
 
-    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      setError("Introduce un e-mail válido.");
-      return;
-    }
+    onLogin({
+      email: normalizeEmail(values.email),
+    });
+  };
 
-    setError("");
-    onLogin({ name: trimmedName, email: trimmedEmail });
+  if (user) {
+    return (
+      <div style={{ display: "grid", gap: "1rem", maxWidth: 520 }}>
+        <p style={{ margin: 0 }}>
+          Sesión iniciada como <strong>{user.email}</strong> ({user.role})
+        </p>
+
+        <button
+          type="button"
+          onClick={() =>
+            typeof onLogout === "function" ? onLogout() : null
+          }
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    );
   }
 
   return (
-    <section className="user-form">
-      <h2 className="user-form__title">Acceso de usuario</h2>
-
-      {user ? (
-        <>
-          <p className="user-form__welcome">
-            Sesión iniciada como{" "}
-            <strong>
-              {user.name} ({user.email})
-            </strong>
-            .
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      style={{ display: "grid", gap: "1rem", maxWidth: 520 }}
+      noValidate
+    >
+      <label style={{ display: "grid", gap: "0.35rem" }}>
+        <span>Email</span>
+        <input
+          type="email"
+          placeholder="tu@email.com"
+          {...register("email", {
+            required: "El email es obligatorio.",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Introduce un email válido.",
+            },
+          })}
+        />
+        {errors.email && (
+          <p style={{ margin: 0, color: "#b3261e" }}>
+            {errors.email.message}
           </p>
-          <button type="button" onClick={onLogout}>
-            Cerrar sesión
-          </button>
-        </>
-      ) : (
-        <form className="user-form__form" onSubmit={handleSubmit}>
-          <div className="user-form__field">
-            <label htmlFor="name">Nombre</label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="user-form__field">
-            <label htmlFor="email">E-mail</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          {error && <p className="user-form__error">{error}</p>}
-          <button type="submit">Iniciar sesión</button>
-        </form>
-      )}
-    </section>
+        )}
+      </label>
+
+      <label style={{ display: "grid", gap: "0.35rem" }}>
+        <span>Contraseña</span>
+        <input
+          type="password"
+          placeholder="••••••••"
+          {...register("password", {
+            required: "La contraseña es obligatoria.",
+            minLength: { value: 6, message: "Mínimo 6 caracteres." },
+            maxLength: { value: 32, message: "Máximo 32 caracteres." },
+          })}
+        />
+        {errors.password && (
+          <p style={{ margin: 0, color: "#b3261e" }}>
+            {errors.password.message}
+          </p>
+        )}
+      </label>
+
+      <label style={{ display: "grid", gap: "0.35rem" }}>
+        <span>Repetir contraseña</span>
+        <input
+          type="password"
+          placeholder="••••••••"
+          {...register("repeatPassword", {
+            required: "Repite la contraseña.",
+            validate: (value) =>
+              value === password || "Las contraseñas no coinciden.",
+          })}
+        />
+        {errors.repeatPassword && (
+          <p style={{ margin: 0, color: "#b3261e" }}>
+            {errors.repeatPassword.message}
+          </p>
+        )}
+      </label>
+
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Accediendo..." : "Iniciar sesión"}
+      </button>
+
+      <p style={{ margin: 0, opacity: 0.75, fontSize: "0.9rem" }}>
+        Si tu email contiene <strong>admin</strong>, entrarás como administrador.
+      </p>
+    </form>
   );
 }
 

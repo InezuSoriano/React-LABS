@@ -1,74 +1,37 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import "./Modal.css";
 
+const urlPattern = /^https?:\/\/.+/i;
+
 function AddProductModal({ onClose, onSubmit }) {
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    price: "",
-    category: "",
-    image: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm({
+    mode: "onBlur",
+    reValidateMode: "onBlur",
+    defaultValues: {
+      title: "",
+      description: "",
+      price: "",
+      category: "",
+      image: "",
+    },
   });
 
-  const [errors, setErrors] = useState({});
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-
-    setErrors((prev) => ({ ...prev, [name]: "" }));
-  }
-
-  function validate() {
-    const newErrors = {};
-
-    if (!form.title.trim()) {
-      newErrors.title = "El título es obligatorio.";
-    }
-
-    if (!form.description.trim()) {
-      newErrors.description = "La descripción es obligatoria.";
-    }
-
-    if (!form.category.trim()) {
-      newErrors.category = "La categoría es obligatoria.";
-    }
-
-    const priceNumber = Number(form.price);
-    if (!form.price) {
-      newErrors.price = "El precio es obligatorio.";
-    } else if (Number.isNaN(priceNumber) || priceNumber <= 0) {
-      newErrors.price = "El precio debe ser un número mayor que 0.";
-    }
-
-    if (form.image.trim()) {
-      // validación muy ligera de URL
-      const looksLikeUrl = /^https?:\/\/.+/i.test(form.image.trim());
-      if (!looksLikeUrl) {
-        newErrors.image = "Introduce una URL de imagen válida (http o https).";
-      }
-    }
-
-    return newErrors;
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
+  const submit = (values) => {
     onSubmit({
-      ...form,
-      price: Number(form.price),
+      title: values.title.trim(),
+      description: values.description.trim(),
+      category: values.category.trim(),
+      image: values.image.trim(),
+      price: Number(values.price),
       rating: { rate: 0, count: 0 },
     });
 
     onClose();
-  }
+  };
 
   function handleOverlayClick(e) {
     if (e.target.classList.contains("modal-overlay")) {
@@ -81,70 +44,78 @@ function AddProductModal({ onClose, onSubmit }) {
       <div className="modal">
         <h2>Añadir nuevo producto</h2>
 
-        <form onSubmit={handleSubmit} className="modal__form">
+        <form onSubmit={handleSubmit(submit)} className="modal__form" noValidate>
           <label className="modal__field">
             <span>Título</span>
             <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
               autoComplete="off"
+              {...register("title", {
+                required: "El título es obligatorio.",
+                minLength: { value: 3, message: "Mínimo 3 caracteres." },
+                maxLength: { value: 60, message: "Máximo 60 caracteres." },
+              })}
             />
-            {errors.title && (
-              <p className="modal__error">{errors.title}</p>
-            )}
+            {errors.title && <p className="modal__error">{errors.title.message}</p>}
           </label>
 
           <label className="modal__field">
             <span>Precio</span>
             <input
-              name="price"
               type="number"
               step="0.01"
-              value={form.price}
-              onChange={handleChange}
+              {...register("price", {
+                required: "El precio es obligatorio.",
+                valueAsNumber: true,
+                validate: (v) =>
+                  Number.isFinite(v) && v > 0 ? true : "El precio debe ser mayor que 0.",
+              })}
             />
-            {errors.price && (
-              <p className="modal__error">{errors.price}</p>
-            )}
+            {errors.price && <p className="modal__error">{errors.price.message}</p>}
           </label>
 
           <label className="modal__field">
             <span>Categoría</span>
             <input
-              name="category"
-              value={form.category}
-              onChange={handleChange}
               autoComplete="off"
+              {...register("category", {
+                required: "La categoría es obligatoria.",
+                minLength: { value: 3, message: "Mínimo 3 caracteres." },
+                maxLength: { value: 30, message: "Máximo 30 caracteres." },
+              })}
             />
             {errors.category && (
-              <p className="modal__error">{errors.category}</p>
+              <p className="modal__error">{errors.category.message}</p>
             )}
           </label>
 
           <label className="modal__field">
-            <span>URL de imagen (opcional)</span>
+            <span>URL de imagen</span>
             <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
               autoComplete="off"
+              placeholder="https://..."
+              {...register("image", {
+                required: "La URL de imagen es obligatoria.",
+                pattern: {
+                  value: urlPattern,
+                  message: "Introduce una URL válida (http o https).",
+                },
+              })}
             />
-            {errors.image && (
-              <p className="modal__error">{errors.image}</p>
-            )}
+            {errors.image && <p className="modal__error">{errors.image.message}</p>}
           </label>
 
           <label className="modal__field">
             <span>Descripción</span>
             <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
               rows={3}
+              {...register("description", {
+                required: "La descripción es obligatoria.",
+                minLength: { value: 10, message: "Mínimo 10 caracteres." },
+                maxLength: { value: 200, message: "Máximo 200 caracteres." },
+              })}
             />
             {errors.description && (
-              <p className="modal__error">{errors.description}</p>
+              <p className="modal__error">{errors.description.message}</p>
             )}
           </label>
 
@@ -152,8 +123,8 @@ function AddProductModal({ onClose, onSubmit }) {
             <button type="button" onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit">
-              Crear
+            <button type="submit" disabled={isSubmitting || !isValid}>
+              {isSubmitting ? "Creando..." : "Crear"}
             </button>
           </div>
         </form>
